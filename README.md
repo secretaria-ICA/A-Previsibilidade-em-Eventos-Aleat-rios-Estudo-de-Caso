@@ -126,7 +126,7 @@ Um gráfico com a representação das 10 dezenas mais sorteadas na base também 
 
 ![image](https://user-images.githubusercontent.com/11425838/190719987-6642cd92-11fa-4a25-abb8-2a9035878afc.png)
 
-O notebook descritivo pode ser acessado (aqui)[https://github.com/silviapuetter/A-Previsibilidade-em-Eventos-Aleat-rios-Estudo-de-Caso/tree/main/Notebooks%20modelos%20RN%20Multi%20label]
+O notebook descritivo pode ser acessado [aqui](https://github.com/silviapuetter/A-Previsibilidade-em-Eventos-Aleat-rios-Estudo-de-Caso/tree/main/Notebooks%20modelos%20RN%20Multi%20label)
 
 2.3.	Tratamento de variáveis categóricas - dummies
 Após a análise descritiva, avançou-se para a elaboração do modelo preditivo propriamente dito. As bases .xlsx foram carregadas para novo ambiente do Google Colab, e realizou-se a conferência de sua correta transferência. A última coluna da base foi removida por se tratar de uma coluna com o resultado da multiplicação das dezenas, que não será utilizada na modelo.
