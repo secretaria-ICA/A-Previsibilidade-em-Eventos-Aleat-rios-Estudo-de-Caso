@@ -58,6 +58,8 @@ Explorou-se a disponibilidade de dados públicos na web, de modo que um levantam
 O Instituto Nacional de Meteorologia – INMET, do Ministério da Agricultura, Pecuária e Abastecimento, dispõe de um banco de dados meteorológicos cujo histórico cobre o período dos registros históricos da Mega Sena [6]. Foram selecionados, então, dados diários, das estações convencionais, com abrangência nacional, no período de 01/01/1996 até 24/05/2022. Foram selecionadas todas as capitais dos 26 estados e Distrito Federal. As variáveis apuradas foram: (1) evaporação do piche diária(mm), (2) insolação total diário, (3) precipitação total diário(mm), (4) temperatura máxima diária (°c), (5) temperatura média compensada diária (°c), (6) temperatura mínima diária (°c), (7) umidade relativa do ar média diária (%), (8) vento velocidade média diária (m/s). 
 Em cada capital, foi selecionada, dentre as estações operantes, aquela com o maior número de registros no período. Nos casos em que as estações da capital apresentavam histórico bastante limitado, com estações inoperantes por períodos superiores a 2 anos, foi selecionada outra estação no estado, que tivesse uma cobertura maior, ainda que fora da capital. Houve, ainda, situação em que a ausência de dados era bastante constante no histórico disponibilizado pelo INMET, o que fez com que alguns dados fossem mesclados com diferentes estações a fim de se alcançar uma base melhor para alimentação do modelo, posteriormente. A lista de estações contempladas no estudo pode ser conhecida nos arquivos do trabalho.
 Mesmo com todas essas premissas para extração da maior base histórica possível, observou-se que alguns parâmetros a serem utilizados no modelo continuavam apresentando elevada frequência de valores nulos e, embora pudessem ser relevantes para o modelo, qualquer tratamento realizado previamente poderia não ter ganho representativo. Foi definido que variáveis em que a frequência de valor nulo fosse maior ou igual a 600, dentro de um universo de 2.472 registros possíveis, seriam descartadas da base. A métrica foi manter apenas as variáveis cujos registros superassem 75% do tamanho do histórico dos resultados do sorteio. Com a remoção, a base contabilizou 191 atributos diários meteorológicos.
+Uma análise global dos atributos apontou que a ausência sequencial de registros representativa que, embora menor que 75% do período apurado, poderia fragilizar o futuro modelo. Contanto com uma quantidade de atributos suficiente de atributos, optou-se pela eliminação daqueles que apresentassem quantidade de registros nulos maior que 150, pois, ainda assim, continuar-se-ia com uma dataset significativo, com registros de 136 atributos válidos.
+
 2.1.3.	Histórico de variáveis abstratas/subjetivas
 Em busca de uma base diversa, investigou-se variáveis subjetivas e com uma essência mais mística. Reunindo as antigas formas de se prever eventos, ainda presentes na sociedade dos dias atuais, optou-se por variáveis astrológicas que tivessem seu levantamento viável para o estudo. Adotou-se 4 variáveis neste subgrupo: luas, signos, dias da semana e estação do ano nos dias dos sorteios. A fim de não tornar a extração de dados custosa, embora diminuto, o subgrupo se limitou a esses atributos.
 Os dias de semana foram extraídos do próprio histórico da Caixa Econômica Federal, e os mesmos foram convertidos para valores numéricos, seguindo o seguinte racional:
@@ -109,6 +111,7 @@ As estações do ano foram retiradas de site da Fiocruz, que disponibiliza as da
 
 Ao final do processo de localização da informação na web, extração e seleção dos atributos que farão parte do estudo, o banco de dados consolidado contou com 2.472 registros de sorteios entre o período de 11 de março de 1996 e 16 de abril de 2022, e 195 atributos.
 Os arquivos com os dados desta subseção e seu tratamento em Excel encontram-se nos anexos deste estudo.
+
 2.2.	Análise exploratória e Pré-tratamento em Python
 O trabalho e o modelo proposto foram desenvolvidos utilizando a ferramenta Python no ambiente do Google Colab. O arquivo .xlsx da base de dados foi inserido no ambiente virtual e importado para o notebook.
 Em um primeiro momento foi realizada uma análise exploratória da base de dados gerada, para maior compreensão do seu conteúdo. Foi montada uma matriz para visualização rápida de valores ausentes e sua distribuição pelos atributos:
@@ -134,14 +137,18 @@ O trabalho de data mining começou com o tratamento das variáveis categóricas,
 
 2.4.	Tratamento de valores ausentes
 Os valores ausentes foram tratados com o comando de impute de KNN (k-nearest neighbors) da biblioteca sklearn. Foi utilizado k = 5, de modo que os valores ausentes acompanhassem de alguma forma o comportamento dos 5 registros mais próximos.
+
 2.5.	Separação na base de treino e teste
 O dataset foi, então, separado em base de treino e teste, na proporção de 75%-25%, através do comando train_test_split, também do sklearn. A separação foi aleatória, sem que houvesse qualquer consideração temporal dos dados.
+
 2.6.	Tratamento dos dados de ENTRADA – normalização dos dados numéricos
 As variáveis numéricas com registros climáticos da base de treino foram normalizadas, também com a utilização da biblioteca do sklearn, e a métrica foi aplicada na base de teste.
 A normalização de dados numéricos de um conjunto é benéfica pois reduz a redundância dos dados e nivela os pesos quando atributos de uma mesma base tem dimensões e ordens de grandeza distintas.
+
 2.7.	Tratamento dos dados de SAÍDA - transformação das dezenas sorteadas em um array
 Os dados de saída continham 6 atributos, cada um referente à uma dezena sorteada. Uma vez que a ordem de sorteio das mesmas não altere o resultado e, buscando uma saída única para cada evento, transformou-se os 6 dados de saída de cada evento em um array com 6 registros.
 Foi criada uma função que transformasse essa saída array de 6 elementos em uma saída binária com 60 valores, sendo o valor 1 atribuído à localização correspondente na sequência do novo array. Ex: para um sorteio cujo resultado foi 1, 3, 5, 7, 8 e 9, o novo array ficou: [1, 0, 1, 0, 1, 0, 1, 1, 1, 0, ... + 50 zeros]. Esta transformação permitirá a elaboração de uma rede neural com 60 neurônios na saída.
+
 2.8.	Rede neural proposta – Rede Neural Multi-label
 Seguindo a lógica de elaboração, optou-se pela construção de uma rede neural multi-label, onde cada uma das dezenas possíveis foi transformada em uma classe de saída, representada por 60 neurônios.
 A entrada da rede teve o tamanho idêntico ao número de atributos da base final de entrada – x_train e x_test – equivalente aos 153 atributos. Foi utilizada a biblioteca tensorflow, keras para a construção do modelo. Foram criadas 6 camadas densas, com, respectivamente, 80-200-300-200-80-60 neurônios, totalizando 169.960 parâmetros. Optou-se por uma função sigmóide na ativação da 1ª camada e as camadas intermediárias foram testadas com sigmóides e tangente hiperbólica. A camada de saída finalizou com uma função softmax. A arquitetura final da rede proposta está representada na figura a seguir.
@@ -150,6 +157,7 @@ A entrada da rede teve o tamanho idêntico ao número de atributos da base final
 
 2.9.	Variáveis do modelo de rede treinado
 A rede foi treinada com diferentes modelos, buscando-se aquele que melhor resultados apresentasse. Foram alteradas as quantidades de neurônios nas camadas densas (exceto a camada de saída, que permaneceu com 60 neurônios em todos os modelos), de épocas de treinamento e batch-size. Diferentes funções de ativação foram testadas nas camadas, porém sempre iniciando com uma sigmóide e terminando com uma softmax. Otimizadores e custo de perda do modelo também foram alterados, de modo a se explorar a existência de uma melhor configuração. Os resultados foram organizados apontando as variações utilizadas e os resultados de acurácia de cada modelo.
+
 2.10.	Exibição da relação realizado X previsão do modelo: exemplo
 Uma vez tendo se treinado o modelo, e obtido seus resultados, foi construída uma saída no notebook para visualização dos valores previstos e realizados de um sorteio qualquer na base de teste. A primeira coluna exibe o resultado do sorteio em questão. Na segunda coluna são apresentadas as seis dezenas cujas saídas da rede treinada apresentaram o maior valor. E na terceira coluna, o valor dessas saídas previstas pelo modelo. 
 
