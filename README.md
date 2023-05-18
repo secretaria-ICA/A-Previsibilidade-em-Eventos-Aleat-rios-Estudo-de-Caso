@@ -1,4 +1,4 @@
-# A Previsibilidade em Eventos Aleatórios
+# A_Previsibilidade_em_Eventos_Aleatorios
 
 #### Aluno: [Silvia Puetter Mattos](https://github.com/silviapuetter)
 #### Orientadora: [Manoela Kohler](https://github.com/manoelakohler)
